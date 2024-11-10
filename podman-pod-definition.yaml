@@ -5,13 +5,12 @@ metadata:
   labels:
     app: nautobot
 spec:
-  restartPolicy: Always
   containers:
     - name: nautobot-web
       image: ghcr.io/nautobot/nautobot
       ports:
         - containerPort: 8080
-          hostPort: 8080
+        - hostPort: 8080
       env:
         - name: DATABASE_URL
           value: "postgres://nautobot:nautobot@nautobot-db:5432/nautobot"
@@ -45,7 +44,31 @@ spec:
       ports:
         - containerPort: 6379
 
-
+    # Celery Task Scheduler
+    - name: nautobot-celery-beat
+      image: ghcr.io/nautobot/nautobot
+      
+      command: ["/bin/sh", "-c", "sleep 10 && nautobot-server celery beat -l info"]
+      env:
+        - name: DATABASE_URL
+          value: "postgres://nautobot:nautobot@nautobot-db:5432/nautobot"
+        - name: REDIS_URL
+          value: "redis://nautobot-redis:6379"
+      volumeMounts:
+        - mountPath: /opt/nautobot/nautobot_config.py
+          name: nautobot-config
+    # Celery Worker 1 with delay
+    - name: nautobot-celery-worker-1
+      image: ghcr.io/nautobot/nautobot
+      command: ["/bin/sh", "-c", "sleep 10 && nautobot-server celery worker -l info"]
+      env:
+        - name: DATABASE_URL
+          value: "postgres://nautobot:nautobot@nautobot-db:5432/nautobot"
+        - name: REDIS_URL
+          value: "redis://nautobot-redis:6379"
+      volumeMounts:
+        - mountPath: /opt/nautobot/nautobot_config.py
+          name: nautobot-config
   volumes:
     - name: nautobot-config
       hostPath:
@@ -56,4 +79,4 @@ spec:
     - name: nautobot-static
       emptyDir: {}
     - name: nautobot-db-data
-      emptyDir: {}  
+      emptyDir: {}
