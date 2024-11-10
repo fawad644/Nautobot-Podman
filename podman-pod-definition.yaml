@@ -18,7 +18,7 @@ spec:
         - name: REDIS_URL
           value: "redis://nautobot-redis:6379"
       volumeMounts:
-        - mountPath: /opt/nautobot/config
+        - mountPath: /opt/nautobot/nautobot_config.py
           name: nautobot-config
         - mountPath: /opt/nautobot/media
           name: nautobot-media
@@ -45,12 +45,15 @@ spec:
       ports:
         - containerPort: 6379
 
+
   volumes:
     - name: nautobot-config
-      emptyDir: {}
+      hostPath:
+        path: /Users/fawadnaseer/Documents/GitHub/Nautobot-Podman/nautobot_config.py # Replace with Config file Path
+        type: Directory
     - name: nautobot-media
       emptyDir: {}
     - name: nautobot-static
       emptyDir: {}
     - name: nautobot-db-data
-      emptyDir: {}  # Use a persistent volume for production
+      emptyDir: {}  
