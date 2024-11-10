@@ -1,4 +1,4 @@
-Here's the updated `README.md` with the inclusion of **Nautobot Celery Beat** and **Nautobot Celery Worker**:
+Here's the updated `README.md` reflecting the need to update the volume mounts for the Nautobot configuration file and data storage:
 
 ---
 
@@ -31,18 +31,32 @@ git clone <repository-url>
 cd Nautobot-Podman
 ```
 
-### 2. Configure Secrets for Postgres
+### 2. Update Volume Mounts
 
-This setup requires a PostgreSQL password, which should be handled securely. You need to create a Postgres secret that will be referenced within the pod YAML file.
+You’ll need to specify locations on your host machine to store Nautobot’s configuration file and data.
 
-1. Open the `nautobot.yaml` file (or the equivalent pod YAML file you're using).
-2. Replace the placeholder password in the `POSTGRES_PASSWORD` environment variable under the `nautobot-db` container definition with a secure value. You should ideally use a more secure secret management strategy rather than hardcoding passwords in the YAML file.
+1. **Open the `nautobot.yaml` file** (or the equivalent pod YAML file you're using).
+2. Update the `hostPath` for the Nautobot configuration file and data directories under the `volumes` section to point to desired locations on your system. This will ensure persistent storage for configuration and data across restarts.
 
-   **Example**:
+   For example:
    ```yaml
-   env:
-     - name: POSTGRES_PASSWORD
-       value: "your_secure_password_here"
+   volumes:
+     - name: nautobot-config
+       hostPath:
+         path: /absolute/path/to/your/nautobot_config.py # Replace with the actual path to your Nautobot config file
+         type: File
+     - name: nautobot-media
+       hostPath:
+         path: /absolute/path/to/your/media/directory # Replace with the desired path for Nautobot media files
+         type: Directory
+     - name: nautobot-static
+       hostPath:
+         path: /absolute/path/to/your/static/directory # Replace with the desired path for Nautobot static files
+         type: Directory
+     - name: nautobot-db-data
+       hostPath:
+         path: /absolute/path/to/your/database/data # Replace with the desired path for Postgres data
+         type: Directory
    ```
 
 ### 3. Start the Nautobot Pod
@@ -69,12 +83,6 @@ This command will prompt you to enter a username, email, and password for the su
 
 Once the setup is complete, you should be able to access Nautobot via `http://localhost:8080` (or the appropriate port specified in your YAML file). Log in with the superuser credentials you created.
 
-## Security Considerations
-
-The current configuration includes sensitive information (e.g., database passwords) directly within the YAML file. **For a production environment**, you should:
-- Use Podman’s secret management or environment files to handle sensitive data.
-- Configure more robust security settings, including network restrictions and SSL configurations, for both the database and Nautobot.
-
 ## Components Included
 
 - **Nautobot app**: The core Nautobot application.
@@ -89,4 +97,4 @@ This configuration provides a quick setup for local development and testing with
 
 ---
 
-This updated `README.md` now includes descriptions for **Nautobot Celery Beat** and **Nautobot Celery Worker** to reflect the full functionality included in the setup.
+This `README.md` now reflects instructions for updating volume mounts to specify custom paths for configuration and data persistence.
