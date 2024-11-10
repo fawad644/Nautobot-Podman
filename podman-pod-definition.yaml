@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nautobot
+  labels:
+    app: nautobot
+spec:
+  restartPolicy: Always
+  containers:
+    - name: nautobot-web
+      image: ghcr.io/nautobot/nautobot
+      ports:
+        - containerPort: 8080
+          hostPort: 8080
+      env:
+        - name: DATABASE_URL
+          value: "postgres://nautobot:nautobot@nautobot-db:5432/nautobot"
+        - name: REDIS_URL
+          value: "redis://nautobot-redis:6379"
+      volumeMounts:
+        - mountPath: /opt/nautobot/config
+          name: nautobot-config
+        - mountPath: /opt/nautobot/media
+          name: nautobot-media
+        - mountPath: /opt/nautobot/static
+          name: nautobot-static
+
+    - name: nautobot-db
+      image: postgres:13
+      env:
+        - name: POSTGRES_DB
+          value: "nautobot"
+        - name: POSTGRES_USER
+          value: "nautobot"
+        - name: POSTGRES_PASSWORD
+          value: "your_password_here"
+      ports:
+        - containerPort: 5432
+      volumeMounts:
+        - name: nautobot-db-data
+          mountPath: /var/lib/postgresql/data
+
+    - name: nautobot-redis
+      image: redis:6
+      ports:
+        - containerPort: 6379
+
+  volumes:
+    - name: nautobot-config
+      emptyDir: {}
+    - name: nautobot-media
+      emptyDir: {}
+    - name: nautobot-static
+      emptyDir: {}
+    - name: nautobot-db-data
+      emptyDir: {}  # Use a persistent volume for production
