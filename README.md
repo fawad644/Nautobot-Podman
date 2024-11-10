@@ -1,7 +1,3 @@
-Here's the updated `README.md` reflecting the need to update the volume mounts for the Nautobot configuration file and data storage:
-
----
-
 # Nautobot-Podman
 
 This project provides a setup to help you get started with running Nautobot using Podman. **Note:** This configuration is intended for development and testing purposes and is **not production ready**.
